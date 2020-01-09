@@ -10,19 +10,15 @@ import org.apache.http.client.methods.HttpHead;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
+import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.synonym.SolrSynonymParser;
 import org.apache.lucene.analysis.synonym.SynonymMap;
 import org.apache.lucene.analysis.synonym.WordnetSynonymParser;
-import org.elasticsearch.common.io.FastStringReader;
-import org.elasticsearch.common.logging.ESLoggerFactory;
 import org.elasticsearch.env.Environment;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.Reader;
+import java.io.*;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.text.ParseException;
@@ -35,7 +31,7 @@ public class RemoteSynonymFile implements SynonymFile {
     private static final String LAST_MODIFIED_HEADER = "Last-Modified";
     private static final String ETAG_HEADER = "ETag";
 
-    private static Logger logger = ESLoggerFactory.getLogger("dynamic-synonym");
+    private static Logger logger = LogManager.getLogger("dynamic-synonym");
 
     private CloseableHttpClient httpclient;
 
@@ -152,12 +148,12 @@ public class RemoteSynonymFile implements SynonymFile {
                     sb.append(line)
                             .append(System.getProperty("line.separator"));
                 }
-                reader = new FastStringReader(sb.toString());
+                reader = new StringReader(sb.toString());
             }
         } catch (Exception e) {
             logger.error("get remote synonym reader {} error!", e, location);
-            throw new IllegalArgumentException(
-                    "Exception while reading remote synonyms file", e);
+            throw new IllegalArgumentException("Exception while reading remote synonyms file", e);
+
         } finally {
             try {
                 if (br != null) {
